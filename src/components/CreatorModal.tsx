@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Save, Sparkles, Lock, Smile, Mail, Camera, HelpCircle, Plus, Trash2, RotateCcw, Check, Image as ImageIcon, MapPin, Edit3, Mic, Square, Play, Volume2, Award, Tag, Upload } from 'lucide-react';
+import { X, Save, Sparkles, Lock, Smile, Mail, Camera, HelpCircle, Plus, Trash2, RotateCcw, Check, Image as ImageIcon, MapPin, Edit3, Mic, Square, Play, Volume2, Award, Tag, Upload, Github, Download, Copy, ExternalLink, Key, RefreshCw, CheckCircle2, AlertCircle } from 'lucide-react';
 import { BirthdayConfig, InsideJoke, Memory, QuizQuestion, QuizResultTier, SecretLetter } from '../types';
 import { soundFX } from '../utils/soundEffects';
 
@@ -17,9 +17,20 @@ export const CreatorModal: React.FC<CreatorModalProps> = ({
   onReset,
   onClose,
 }) => {
-  const [activeTab, setActiveTab] = useState<'general' | 'jokes' | 'letter' | 'memories' | 'quiz'>('general');
+  const [activeTab, setActiveTab] = useState<'general' | 'jokes' | 'letter' | 'memories' | 'quiz' | 'github'>('general');
   const [formData, setFormData] = useState<BirthdayConfig>({ ...config });
   const [saveSuccess, setSaveSuccess] = useState(false);
+
+  // GitHub Sync state
+  const [ghOwner, setGhOwner] = useState('iqbaalmuhmd');
+  const [ghRepo, setGhRepo] = useState('pingrei');
+  const [ghBranch, setGhBranch] = useState('main');
+  const [ghToken, setGhToken] = useState(() => localStorage.getItem('gh_pat_token') || '');
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<{
+    type: 'idle' | 'loading' | 'success' | 'error';
+    message: string;
+  }>({ type: 'idle', message: '' });
 
   // New Joke state
   const [newJokeTitle, setNewJokeTitle] = useState('');
@@ -95,6 +106,116 @@ export const CreatorModal: React.FC<CreatorModalProps> = ({
     { label: 'Food 🍜', url: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=600&q=80' },
     { label: 'Flowers 💐', url: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=600&q=80' },
   ];
+
+  const generateDataCode = (data: BirthdayConfig) => {
+    return `import { BirthdayConfig } from '../types';
+
+export const defaultBirthdayConfig: BirthdayConfig = ${JSON.stringify(data, null, 2)};
+`;
+  };
+
+  const handlePushToGithub = async () => {
+    if (!ghToken.trim()) {
+      soundFX.playBuzz();
+      setSyncStatus({ type: 'error', message: 'Please enter your GitHub Personal Access Token (PAT) first!' });
+      return;
+    }
+
+    setIsSyncing(true);
+    soundFX.playPop();
+    setSyncStatus({ type: 'loading', message: 'Connecting to GitHub API...' });
+
+    try {
+      const filePath = 'src/data/defaultData.ts';
+      const apiUrl = `https://api.github.com/repos/${ghOwner.trim()}/${ghRepo.trim()}/contents/${filePath}`;
+
+      // 1. Get existing file SHA if available
+      let sha = '';
+      setSyncStatus({ type: 'loading', message: `Checking ${ghOwner}/${ghRepo} for defaultData.ts SHA...` });
+      const getRes = await fetch(`${apiUrl}?ref=${ghBranch.trim()}`, {
+        headers: {
+          Authorization: `Bearer ${ghToken.trim()}`,
+          Accept: 'application/vnd.github.v3+json',
+        },
+      });
+
+      if (getRes.ok) {
+        const getJson = await getRes.json();
+        sha = getJson.sha;
+      }
+
+      // 2. Format code and UTF-8 Base64 encode
+      setSyncStatus({ type: 'loading', message: 'Encoding pictures, audio recordings, and text content...' });
+      const codeContent = generateDataCode(formData);
+
+      const utf8Bytes = new TextEncoder().encode(codeContent);
+      let binary = '';
+      for (let i = 0; i < utf8Bytes.length; i++) {
+        binary += String.fromCharCode(utf8Bytes[i]);
+      }
+      const base64Content = btoa(binary);
+
+      // Save token locally
+      localStorage.setItem('gh_pat_token', ghToken.trim());
+
+      // 3. Commit file via REST API
+      setSyncStatus({ type: 'loading', message: `Committing changes to ${ghBranch} branch...` });
+      const putRes = await fetch(apiUrl, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${ghToken.trim()}`,
+          Accept: 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: 'Update birthday vault content & media from Iqbal Sz Creator Portal',
+          content: base64Content,
+          sha: sha || undefined,
+          branch: ghBranch.trim(),
+        }),
+      });
+
+      if (!putRes.ok) {
+        const errJson = await putRes.json();
+        throw new Error(errJson.message || `GitHub error status ${putRes.status}`);
+      }
+
+      soundFX.playChime();
+      setSyncStatus({
+        type: 'success',
+        message: `🎉 Successfully pushed to GitHub! GitHub Actions deployment is now running and will update ${ghOwner}.github.io/${ghRepo} in about 60 seconds.`,
+      });
+    } catch (err: any) {
+      soundFX.playBuzz();
+      setSyncStatus({
+        type: 'error',
+        message: `Sync failed: ${err.message || 'Check your token permissions or repo name.'}`,
+      });
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const handleDownloadCodeFile = () => {
+    soundFX.playPop();
+    const codeContent = generateDataCode(formData);
+    const blob = new Blob([codeContent], { type: 'text/typescript;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'defaultData.ts';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleCopyCodeFile = () => {
+    soundFX.playPop();
+    const codeContent = generateDataCode(formData);
+    navigator.clipboard.writeText(codeContent);
+    alert('Copied defaultData.ts code to clipboard! You can paste this code directly into src/data/defaultData.ts on GitHub.');
+  };
 
   const handleSave = () => {
     soundFX.playChime();
@@ -405,6 +526,7 @@ export const CreatorModal: React.FC<CreatorModalProps> = ({
             { id: 'quiz', label: 'Quiz 🎯', icon: HelpCircle },
             { id: 'letter', label: 'Secret Letters 💌', icon: Mail },
             { id: 'memories', label: 'Photo Gallery 📸', icon: Camera },
+            { id: 'github', label: 'GitHub Sync 🚀', icon: Github },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -2035,6 +2157,197 @@ export const CreatorModal: React.FC<CreatorModalProps> = ({
                     />
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'github' && (
+            <div className="space-y-6">
+              <div className="p-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-purple-950 text-white rounded-2xl shadow-md border border-slate-800">
+                <div className="flex items-center gap-2 mb-1">
+                  <Github className="w-5 h-5 text-amber-400" />
+                  <h4 className="font-extrabold text-base tracking-tight">
+                    Sync Changes, Uploaded Photos & Voice Notes to GitHub 🚀
+                  </h4>
+                </div>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  When you add inside jokes, upload pictures, record voice notes, or edit letters in Creator Mode, they are converted into data & code strings. Push them directly to your repository so everyone sees your updates on <strong>iqbaalmuhmd.github.io/pingrei</strong>!
+                </p>
+              </div>
+
+              {/* Status Banner */}
+              {syncStatus.type !== 'idle' && (
+                <div
+                  className={`p-4 rounded-2xl text-xs font-semibold flex items-start gap-2.5 border ${
+                    syncStatus.type === 'loading'
+                      ? 'bg-amber-50 text-amber-900 border-amber-200'
+                      : syncStatus.type === 'success'
+                        ? 'bg-emerald-50 text-emerald-900 border-emerald-200'
+                        : 'bg-rose-50 text-rose-900 border-rose-200'
+                  }`}
+                >
+                  {syncStatus.type === 'loading' && <RefreshCw className="w-4 h-4 animate-spin shrink-0 text-amber-600 mt-0.5" />}
+                  {syncStatus.type === 'success' && <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600 mt-0.5" />}
+                  {syncStatus.type === 'error' && <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />}
+                  <span className="leading-relaxed">{syncStatus.message}</span>
+                </div>
+              )}
+
+              {/* Method 1: Automated GitHub API Push */}
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-5 space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-rose-500 text-white flex items-center justify-center font-bold text-xs">
+                      1
+                    </div>
+                    <div>
+                      <h5 className="font-extrabold text-slate-800 text-sm">
+                        Direct 1-Click Sync to GitHub Repo (Automated)
+                      </h5>
+                      <p className="text-xs text-slate-500">
+                        Commits updated content, uploaded images & recorded voice notes directly to GitHub!
+                      </p>
+                    </div>
+                  </div>
+                  <span className="px-2 py-0.5 bg-rose-100 text-rose-700 font-bold text-[10px] rounded-full">
+                    Recommended
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      GitHub Username
+                    </label>
+                    <input
+                      type="text"
+                      value={ghOwner}
+                      onChange={(e) => setGhOwner(e.target.value)}
+                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-mono"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Repository
+                    </label>
+                    <input
+                      type="text"
+                      value={ghRepo}
+                      onChange={(e) => setGhRepo(e.target.value)}
+                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-mono"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Branch
+                    </label>
+                    <input
+                      type="text"
+                      value={ghBranch}
+                      onChange={(e) => setGhBranch(e.target.value)}
+                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-mono"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-bold text-slate-700 flex items-center gap-1">
+                      <Key className="w-3.5 h-3.5 text-amber-500" />
+                      GitHub Personal Access Token (PAT)
+                    </label>
+                    <a
+                      href="https://github.com/settings/tokens/new?scopes=repo&description=Birthday%20Vault%20Creator%20Sync"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[11px] font-bold text-rose-600 hover:underline flex items-center gap-0.5"
+                    >
+                      <span>Create Token on GitHub</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </div>
+                  <input
+                    type="password"
+                    value={ghToken}
+                    onChange={(e) => setGhToken(e.target.value)}
+                    placeholder="Paste token (ghp_xxxxxxxxxxxxxxxxxxxx)"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-mono focus:outline-none focus:ring-2 focus:ring-rose-400"
+                  />
+                  <p className="text-[11px] text-slate-500 mt-1">
+                    Token is saved locally in your browser so you only enter it once. Requires <code className="bg-slate-200 px-1 rounded">repo</code> scope.
+                  </p>
+                </div>
+
+                <button
+                  onClick={handlePushToGithub}
+                  disabled={isSyncing}
+                  className={`w-full py-3 bg-gradient-to-r from-slate-900 via-purple-900 to-rose-900 hover:from-black hover:to-rose-950 text-white font-extrabold text-xs rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer ${
+                    isSyncing ? 'opacity-70 cursor-not-allowed' : 'hover:scale-[1.01]'
+                  }`}
+                >
+                  {isSyncing ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin text-amber-300" />
+                      <span>Syncing & Uploading to GitHub...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Github className="w-4 h-4 text-amber-300" />
+                      <span>🚀 Push All Content & Media to GitHub</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Method 2: Manual Export File */}
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-5 space-y-3">
+                <div className="flex items-center gap-2 border-b border-slate-200 pb-3">
+                  <div className="w-7 h-7 rounded-lg bg-slate-700 text-white flex items-center justify-center font-bold text-xs">
+                    2
+                  </div>
+                  <div>
+                    <h5 className="font-extrabold text-slate-800 text-sm">
+                      Manual File Export (Zero-Token Method)
+                    </h5>
+                    <p className="text-xs text-slate-500">
+                      Download the generated <code className="bg-slate-200 px-1 rounded">defaultData.ts</code> file and upload it manually to GitHub.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <button
+                    onClick={handleDownloadCodeFile}
+                    className="px-4 py-2 bg-white hover:bg-slate-100 text-slate-800 font-bold text-xs rounded-xl border border-slate-300 shadow-xs flex items-center gap-1.5 transition-all cursor-pointer"
+                  >
+                    <Download className="w-4 h-4 text-rose-500" />
+                    <span>Download defaultData.ts</span>
+                  </button>
+
+                  <button
+                    onClick={handleCopyCodeFile}
+                    className="px-4 py-2 bg-white hover:bg-slate-100 text-slate-800 font-bold text-xs rounded-xl border border-slate-300 shadow-xs flex items-center gap-1.5 transition-all cursor-pointer"
+                  >
+                    <Copy className="w-4 h-4 text-purple-500" />
+                    <span>Copy Code to Clipboard</span>
+                  </button>
+
+                  <a
+                    href={`https://github.com/${ghOwner}/${ghRepo}/tree/${ghBranch}/src/data`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-xl border border-rose-200 flex items-center gap-1.5 transition-all"
+                  >
+                    <span>Open GitHub Repo /src/data</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+
+                <ol className="text-xs text-slate-600 space-y-1 pl-4 list-decimal pt-1">
+                  <li>Click <strong>Download defaultData.ts</strong> above.</li>
+                  <li>Open <code className="bg-slate-200 px-1 rounded">github.com/{ghOwner}/{ghRepo}/tree/{ghBranch}/src/data</code> on GitHub.</li>
+                  <li>Click <strong>Add file &gt; Upload files</strong>, drag your downloaded <code className="bg-slate-200 px-1 rounded">defaultData.ts</code> into the box, and click <strong>Commit changes</strong>.</li>
+                </ol>
               </div>
             </div>
           )}
