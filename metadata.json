@@ -1,0 +1,6 @@
+{
+  "name": "Girlfriend Birthday Surprise",
+  "description": "A customizable, interactive birthday website with secret passcode entry, inside jokes vault, memory timeline, love letter, and candle blowing.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
