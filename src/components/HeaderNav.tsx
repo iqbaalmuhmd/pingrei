@@ -90,6 +90,65 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
 
         {/* Action Controls */}
         <div className="flex items-center gap-1.5 sm:gap-2">
+          {/* Theme Selector */}
+          <div className="relative">
+            <button
+              onClick={() => {
+                soundFX.playPop();
+                setShowThemeMenu((prev) => !prev);
+              }}
+              className={`p-2 rounded-xl transition-all flex items-center gap-1 cursor-pointer ${
+                isMidnight
+                  ? 'bg-amber-400/20 text-amber-300 border border-amber-300/30'
+                  : isNatural
+                    ? 'bg-[#e6e2d3] text-[#5d5b4a]'
+                    : 'bg-rose-100 text-rose-700 hover:bg-rose-200'
+              }`}
+              title="Change Theme Palette"
+            >
+              <Palette className="w-4 h-4" />
+              <span className="hidden md:inline text-xs font-bold capitalize">{config.theme}</span>
+            </button>
+
+            {showThemeMenu && (
+              <div
+                className={`absolute right-0 mt-2 w-44 rounded-2xl p-2 shadow-xl border z-50 transition-all ${
+                  isMidnight
+                    ? 'bg-slate-900 border-amber-300/30 text-amber-100'
+                    : 'bg-white border-slate-200 text-slate-800'
+                }`}
+              >
+                <div className="text-[10px] font-extrabold uppercase px-2 py-1 opacity-60">
+                  Select Theme
+                </div>
+                {[
+                  { id: 'natural', label: '🌿 Natural Cream', color: 'bg-[#efece4] text-[#2B2A27]' },
+                  { id: 'rose', label: '💖 Soft Rose', color: 'bg-rose-100 text-rose-800' },
+                  { id: 'lavender', label: '🪻 Lavender', color: 'bg-purple-100 text-purple-800' },
+                  { id: 'sunset', label: '🌅 Sunset Amber', color: 'bg-amber-100 text-amber-800' },
+                  { id: 'midnight', label: '🌙 Midnight Dark', color: 'bg-slate-800 text-amber-200' },
+                ].map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => {
+                      soundFX.playChime();
+                      onThemeChange(t.id as ThemeColor);
+                      setShowThemeMenu(false);
+                    }}
+                    className={`w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center justify-between transition-colors cursor-pointer my-0.5 ${
+                      config.theme === t.id
+                        ? 'ring-2 ring-rose-500 font-extrabold'
+                        : 'hover:opacity-80'
+                    } ${t.color}`}
+                  >
+                    <span>{t.label}</span>
+                    {config.theme === t.id && <Sparkles className="w-3 h-3 text-rose-500" />}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           {/* Sound Toggle */}
           <button
             onClick={handleAudioToggle}

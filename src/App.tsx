@@ -23,7 +23,14 @@ export default function App() {
   const [config, setConfig] = useState<BirthdayConfig>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return {
+          ...defaultBirthdayConfig,
+          ...parsed,
+          theme: parsed.theme === 'midnight' ? 'natural' : (parsed.theme || 'natural'),
+        };
+      }
     } catch {
       // Fallback
     }

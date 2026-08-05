@@ -113,10 +113,10 @@ export const InsideJokesVault: React.FC<InsideJokesVaultProps> = ({
           <Smile className="w-3.5 h-3.5 text-rose-500" />
           The Secret Vault of
         </div>
-        <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-800 tracking-tight">
+        <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
           Our Favorite Inside Jokes 🤫
         </h2>
-        <p className="text-sm sm:text-base text-slate-600 mt-2 leading-relaxed">
+        <p className="text-sm sm:text-base opacity-80 mt-2 leading-relaxed">
           Tap any memory card to reveal the story & punchline! Add or remove custom tags on any joke.
         </p>
 

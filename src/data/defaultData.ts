@@ -228,7 +228,7 @@ Thank you for being my moon, my light, my best friend, and my whole world. I lov
     'Just being YOU—my favorite person in the whole wide universe!'
   ],
   
-  theme: 'midnight',
+  theme: 'natural',
   bgMusicEnabled: true,
 };
 

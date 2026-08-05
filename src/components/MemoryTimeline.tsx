@@ -18,10 +18,10 @@ export const MemoryTimeline: React.FC<MemoryTimelineProps> = ({ memories }) => {
           <Camera className="w-3.5 h-3.5 text-rose-500" />
           Our Memory Lane
         </div>
-        <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-800 tracking-tight">
+        <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
           Snapshots of Us 📸
         </h2>
-        <p className="text-sm text-slate-600">
+        <p className="text-sm opacity-80">
           From the early dates to today—every moment with you is my favorite.
         </p>
       </div>
