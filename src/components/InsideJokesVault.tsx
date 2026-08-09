@@ -117,7 +117,7 @@ export const InsideJokesVault: React.FC<InsideJokesVaultProps> = ({
           Our Favorite Inside Jokes 🤫
         </h2>
         <p className="text-sm sm:text-base opacity-80 mt-2 leading-relaxed">
-          Our inside jokes pokoknya, tapi gga lengkap sih teng, maap yaw.
+          Our inside jokes pokoknya, tapi ga lengkap sih teng, maap yaw.
         </p>
 
         {/* Dynamic Category/Tag Filters */}

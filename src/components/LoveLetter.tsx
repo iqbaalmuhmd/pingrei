@@ -98,11 +98,11 @@ export const LoveLetter: React.FC<LoveLetterProps> = ({ config, onOpenCreator, i
           {isSecretVault ? `Secret Letter Vault (${letters.length}) 💌` : `For My Favorite Human 💌`}
         </div>
         <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-          {isSecretVault ? 'Secret Love Notes 💌' : 'Letter From My Heart 💌'}
+          {isSecretVault ? 'Secret Letters 💌' : 'Birthday Letter 💌'}
         </h2>
         <p className="text-sm opacity-80 mt-2">
           {isSecretVault
-            ? 'A secret collection of love letters unlocked by keeping candles #6 & #7 glowing on your birthday cake!'
+            ? 'Congrats!!! HEHEHEHE SIXXX SEVENNNNNNNNN WKWKWK'
             : 'Written with endless love for your special day...'}
         </p>
       </div>
