@@ -49,7 +49,7 @@ export const PasscodeGate: React.FC<PasscodeGateProps> = ({ config, onUnlock, on
     } else {
       soundFX.playBuzz();
       setIsError(true);
-      setErrorMessage('Oops! Incorrect passcode. Try again or check the hint! 💔');
+      setErrorMessage('SALAHHHHHHHH! 💔');
       setTimeout(() => setIsError(false), 800);
     }
   };
@@ -70,7 +70,7 @@ export const PasscodeGate: React.FC<PasscodeGateProps> = ({ config, onUnlock, on
     } else {
       soundFX.playBuzz();
       setIsError(true);
-      setErrorMessage('Not quite! Think of our favorite memories together 💕');
+      setErrorMessage('SALAAAAAH! 💕');
       setTimeout(() => setIsError(false), 800);
     }
   };
@@ -355,9 +355,6 @@ export const PasscodeGate: React.FC<PasscodeGateProps> = ({ config, onUnlock, on
                   <span>💡 Secret Hint:</span>
                 </div>
                 <p>{config.passcodeHint}</p>
-                <p className="mt-1 text-[11px] text-amber-700/80 italic">
-                  (Default passcode is <code className="bg-amber-100 px-1 py-0.5 rounded font-mono">{config.passcode}</code> or type <code className="bg-amber-100 px-1 py-0.5 rounded font-mono">pizza</code>)
-                </p>
               </motion.div>
             )}
           </AnimatePresence>

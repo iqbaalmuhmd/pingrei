@@ -117,7 +117,7 @@ export const InsideJokesVault: React.FC<InsideJokesVaultProps> = ({
           Our Favorite Inside Jokes 🤫
         </h2>
         <p className="text-sm sm:text-base opacity-80 mt-2 leading-relaxed">
-          Tap any memory card to reveal the story & punchline! Add or remove custom tags on any joke.
+          Our inside jokes pokoknya, tapi gga lengkap sih teng, maap yaw.
         </p>
 
         {/* Dynamic Category/Tag Filters */}

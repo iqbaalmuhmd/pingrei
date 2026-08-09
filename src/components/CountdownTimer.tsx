@@ -65,7 +65,7 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({ targetDateStr, h
         <Moon className="w-5 h-5 text-amber-300 animate-pulse fill-amber-300/30" />
         <span className="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1">
           <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-          Moon Mascot Birthday Countdown
+          Pingrei's Birthday Countdown
         </span>
       </div>
 
@@ -75,7 +75,7 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({ targetDateStr, h
             🎉 IT'S {herName.toUpperCase()}'S BIRTHDAY TODAY! 🎂
           </span>
         ) : (
-          <span>Counting down every second until {herName}'s Birthday (Aug 28) 🌙</span>
+          <span>Counting down every second until loml {herName}'s Birthday (Aug 28) 🌕</span>
         )}
       </h3>
 
@@ -106,13 +106,13 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({ targetDateStr, h
         </div>
       ) : (
         <p className="text-xs opacity-90 text-amber-200 font-medium">
-          The stars and moon are shining bright for {herName} today! 🌟
+          The moon are shining bright for {herName} today! 🌟
         </p>
       )}
 
       <div className="mt-2 text-[11px] opacity-75 flex items-center justify-center gap-1">
         <Heart className="w-3 h-3 text-rose-400 fill-rose-400" />
-        <span>Our mascot Moon 🌙 is watching over us</span>
+        <span>Our Moon 🌕 is watching over us</span>
       </div>
     </motion.div>
   );

@@ -122,7 +122,7 @@ export const BirthdayCake: React.FC<BirthdayCakeProps> = ({
           </p>
 
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100/90 text-amber-900 border border-amber-300 text-xs font-bold mb-2">
-            <span>🌙 Moon Mascot Cake • 8 August Candles 🕯️</span>
+            <span>🌙 A Cake for you dearest</span>
           </div>
 
           {/* Cake Display */}
